@@ -1,0 +1,17 @@
+{
+    "name": "jenoradev/backend",
+    "autoload": {
+        "psr-4": {
+            "Jenoradev\\Backend\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "jenoradev"
+        }
+    ],
+    "require": {
+        "chriskacerguis/codeigniter-restserver": "^3.1",
+        "firebase/php-jwt": "^6.10"
+    }
+}
