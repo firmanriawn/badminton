@@ -6,4 +6,9 @@
    
        RewriteCond %{REQUEST_METHOD} ^(GET|POST|PUT|DELETE|PATCH|OPTIONS)
        RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+   
+       RewriteEngine On
+       RewriteMap lc int:tolower
+       RewriteRule ^/Api/(.*)$ /${lc:Api}/$1 [R=301,L]
+       RewriteRule ^Api/(.*)$ api/$1 [NC,L]
 </IfModule>
