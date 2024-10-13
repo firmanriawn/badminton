@@ -1,9 +1,26 @@
-<IfModule mod_rewrite.c>
-       RewriteEngine On
-       RewriteCond %{REQUEST_FILENAME} !-f
-       RewriteCond %{REQUEST_FILENAME} !-d
-       RewriteRule ^(.*)$ index.php/$1 [L]
-   
-       RewriteCond %{REQUEST_METHOD} ^(GET|POST|PUT|DELETE|PATCH|OPTIONS)
-       RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteEngine On
+RewriteBase /
+
+# Arahkan semua permintaan ke index.php kecuali untuk file dan direktori yang ada
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.php/$1 [L] 
+
+# Ubah semua URL menjadi huruf kecil
+RewriteMap lc int:tolower
+RewriteRule ^(.*)$ ${lc:$1} [R=301,L]
+
+# Atur header CORS
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+# Tangani permintaan OPTIONS untuk preflight CORS
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php80” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php80 .php .php8 .phtml
 </IfModule>
+# php -- END cPanel-generated handler, do not edit
