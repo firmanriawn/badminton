@@ -50,14 +50,12 @@ class Auth extends RestController  {
 
         if ($user && password_verify($password, $user['password'])) {
             $access_token = generate_jwt(encryption($user['id']));
-            $refresh_token = generate_refresh_token(encryption($user['id']));
 
             $this->response([
                 'code' => 200,
                 'message' => 'SUCCESS',
                 'data' => [
-                    'access_token' => $access_token,
-                    'refresh_token' => $refresh_token
+                    'access_token' => $access_token
                 ]
             ], 200);
         } else {
@@ -120,14 +118,12 @@ class Auth extends RestController  {
 
         if ($user_id) {
             $access_token = generate_jwt(encryption($user_id));
-            $refresh_token = generate_refresh_token(encryption($user_id));
 
             $this->response([
                 'code' => 201,
                 'message' => 'CREATED',
                 'data' => [
-                    'access_token' => $access_token,
-                    'refresh_token' => $refresh_token
+                    'access_token' => $access_token
                 ]
             ], 201);
         } else {
@@ -138,66 +134,6 @@ class Auth extends RestController  {
                     'message' => 'Failed to create user'
                 ]
             ], 500);
-        }
-    }
-
-    public function refresh_token_post() {
-        if (!$this->rate_limiter->limit('refresh_token', 10, 60)) {
-            $this->response([
-                'code' => 429,
-                'message' => 'TOO_MANY_REQUESTS',
-                'error' => [
-                    'message' => 'Too many refresh token attempts. Please try again after 1 minute.'
-                ]
-            ], 429); 
-            return;
-        }
-
-        $refresh_token = $this->post('refresh_token');
-        
-        $decoded = verify_jwt($refresh_token);
-        if ($decoded && isset($decoded->type) && $decoded->type === 'refresh') {
-            $user_id = $decoded->user_id;
-            $user_data = $this->user_model->get_user_by_id(dekripsi($user_id));
-            
-            if ($user_data) {
-                $token_data = [
-                    'id' => $user_data['id'],
-                    'email' => $user_data['email'],
-                    'full_name' => $user_data['full_name'],
-                    'role' => $user_data['role'],
-                    'is_active' => $user_data['is_active'],
-                    'created_at' => $user_data['created_at']
-                ];
-
-                $new_token = generate_jwt($token_data);
-                $new_refresh_token = generate_refresh_token($user_id);
-                
-                $this->response([
-                    'code' => 200,
-                    'message' => 'OK',
-                    'data' => [
-                        'access_token' => $new_token,
-                        'refresh_token' => $new_refresh_token
-                    ]
-                ], 200);
-            } else {
-                $this->response([
-                    'code' => 401,
-                    'message' => 'UNAUTHORIZED',
-                    'error' => [
-                        'message' => 'User not found'
-                    ]
-                ], 401);
-            }
-        } else {
-            $this->response([
-                'code' => 401,
-                'message' => 'UNAUTHORIZED',
-                'error' => [
-                    'message' => 'Invalid refresh token'
-                ]
-            ], 401);
         }
     }
 
